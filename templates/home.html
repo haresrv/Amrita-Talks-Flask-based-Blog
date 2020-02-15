@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content2 %}
+            <div class="navbar-nav">
+              <a class="nav-item nav-link" href="/logout">Logout</a>
+            </div>
+{% endblock content2 %}
+
+{% block content %}
+    {% for post in posts %}
+        <article class="media content-section">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <a class="" href="#">{{post.author}}</a>
+                    <small class="text-muted">{{post.date_posted}}</small>
+                </div>
+                <h2>{{post.title}}</h2>
+                <p class="">{{post.content}}</p>
+            </div>
+        </article>
+    {% endfor %}
+{% endblock content%}

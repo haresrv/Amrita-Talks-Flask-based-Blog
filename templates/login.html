@@ -1,0 +1,46 @@
+{% extends "layout.html"%}
+{% block content2 %}
+            <div class="navbar-nav">
+              <a class="nav-item nav-link" href="/login">Login</a>
+              <a class="nav-item nav-link" href="/register">Register</a>
+            </div>
+{% endblock content2 %}
+
+{% block content %}
+    <div style="margin-left:10%">
+        <div style="container">
+            <form action="/register" style="margin:2px">
+                <button value="regpage" class="btn btn-primary">Register</button>
+                <small class="text-muted">New Around here?</small>
+            </form>
+        </div>
+     </div>
+    <div class="row">
+
+        <div class="col-md-push-1 col-md-4 hidden-sm hidden-xs">
+            <img class="pull-right" src="https://cms.cb.amrita.edu/images/amrita_round_2019.png" style="width: 44%; margin-top: 40px; pointer-events: none;" alt="Amrita Vishwa Vidyapeetham Logo">
+        </div>
+        <div class="col-md-4 col-md-push-1">
+            <h3><span class="weight-200"> Login</span></h3>
+
+
+            <form method="post" action="/login" style="margin-top:20px;">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="username" value="{{request.form.username }}" placeholder="Enter your username">
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" name="password" value="{{request.form.password }}" placeholder="Enter your password">
+                </div>
+<!--                <div class="form-group">-->
+<!--                    <a href="#" class="text-muted" data-toggle="modal" data-target="#login-issue-modal">Having trouble logging in ?</a>-->
+<!--                </div>-->
+                <div>
+                    <button type="submit" value="Login" class="btn btn-primary">Login</button>
+                    <button type="reset" class="btn btn-default">Reset</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+{% endblock content %}

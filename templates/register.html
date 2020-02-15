@@ -1,0 +1,57 @@
+{% extends "layout.html"%}
+{% block content2 %}
+            <div class="navbar-nav">
+              <a class="nav-item nav-link" href="/login">Login</a>
+              <a class="nav-item nav-link" href="/register">Register</a>
+            </div>
+{% endblock content2 %}
+{% block content %}
+    <div style="margin-left:10%">
+           <form action="/login">
+                <button value="logpage" class="btn btn-primary">Login</button>
+                <small class="text-muted">Already have an account?</small>
+            </form>
+     </div>
+
+    <div class="row">
+        <div class="col-md-push-1 col-md-4 hidden-sm hidden-xs">
+            <img class="pull-right" src="https://cms.cb.amrita.edu/images/amrita_round_2019.png" style="width: 44%; margin-top: 40px; pointer-events: none;" alt="Amrita Vishwa Vidyapeetham Logo">
+        </div>
+        <div class="col-md-4 col-md-push-1">
+            <h3><span class="col-md-4"> Register</span></h3>
+
+            <form method="post" action="/register" style="margin-top:20px;">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="fname" value="{{request.form.fname }}" placeholder="Enter your First name">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" name="lname" value="{{request.form.lname }}" placeholder="Enter your Last name">
+                </div>
+                <div class="form-group">
+                    <input type="number" class="form-control" name="mobile" value="{{request.form.mobile }}" placeholder="Enter your mobile">
+                </div>
+                <div class="form-group">
+                    <input type="email" class="form-control" name="email" value="{{request.form.email }}" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" name="username" value="{{request.form.username }}" placeholder="Enter your username">
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" name="password" value="{{request.form.password }}" placeholder="Enter your password">
+                </div>
+
+                <div class="form-group">
+                    <input type="password" class="form-control" name="cpassword" value="{{request.form.cpassword }}" placeholder="Retype your password">
+                </div>
+<!--                <div class="form-group">-->
+<!--                    <a href="#" class="text-muted" data-toggle="modal" data-target="#login-issue-modal">Having trouble logging in ?</a>-->
+<!--                </div>-->
+                <div>
+                    <button type="submit" value="Login" class="btn btn-primary">Register</button>
+                    <button type="reset" class="btn btn-default">Reset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+{% endblock content %}
