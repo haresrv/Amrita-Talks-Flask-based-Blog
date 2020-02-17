@@ -1,0 +1,27 @@
+{% extends "layout.html"%}
+{% block content2 %}
+            <div class="navbar-nav">
+              <a class="nav-item nav-link" href="/logout">Logout</a>
+            </div>
+{% endblock content2 %}
+{% block content %}
+     <div class="col-md-4 col-md-push-1">
+            <h3><span class="weight-200"> CREATE NEW POST</span></h3>
+
+            <form method="post" action="/login" style="margin-top:20px;">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="title" value="{{request.form.title }}" placeholder="Enter the Title">
+                </div>
+                <div class="form-group">
+                    <input type="textbox" class="form-control" name="content" value="{{request.form.content }}" placeholder="Type Content...">
+                </div>
+                <div>
+                    <button type="submit" value="Login" class="btn btn-primary">Add Post</button>
+                    <button type="reset" class="btn btn-default">Reset</button>
+                </div>
+            </form>
+
+        </div>
+
+{% endblock content %}
+

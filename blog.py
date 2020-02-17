@@ -49,7 +49,7 @@ posts = [
     }
 ]
 
-users = {"Chosen_One":"DrewMcintyre123","Architect":"SethRollins123","Rated_R_Superstar":"Edge123","Phenomenal_One":"AJStyles123"}
+# users = {"Chosen_One":"DrewMcintyre123","Architect":"SethRollins123","Rated_R_Superstar":"Edge123","Phenomenal_One":"AJStyles123"}
 
 def login_required(f):
     @wraps(f)
@@ -72,8 +72,26 @@ def validate(password):
         else:
             return None
 
+
+def isInvalid(username):
+        user=User.query.filter_by(username=username).first()
+        if user:
+            return 1
+        else:
+            return 0
+
+
+def isInvalidMail(email):
+    user = User.query.filter_by(email=email).first()
+    if user:
+        return 1
+    else:
+        return 0
+
+
 @app.route("/")
 @app.route("/home")
+@login_required
 def home():
     return render_template("home.html",posts=posts)
 
@@ -81,27 +99,28 @@ def home():
 def about():
     return render_template("about.html",title='About')
 
+@app.route("/create")
+def create():
+    return render_template("new_post.html",title='NEW POST')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
     if request.method == 'POST':
-        if (request.form['username']) in users:
-            if request.form['password'] != users[request.form['username']]:
+        # bcrypt.hashpw(request.form['password'].encode('utf-8').encode('utf-8'), hashed_password) == hashed_password
+        user = User.query.filter_by(username=request.form['username']).first()
+        hashed_password = User.query.filter_by(username=request.form['username']).first().password
+        if not (user and (bcrypt.hashpw(request.form['password'].encode('utf-8'), hashed_password) == hashed_password)):
                 # error = 'Invalid Credentials. Please try again.'
                 flash('Invalid Credentials. Please try again.','danger')
                 # print(users)
-            else:
-                current_user=request.form['username']
-
-                session['logged_in'] = True
-                # print("CUR1",current_user)
-                flash('You were logged in.','success')
-                return redirect(url_for('home'))
         else:
-            # print(users)
-            flash('Invalid2 Credentials. Please try again.','danger')
+            current_user=request.form['username']
 
+            session['logged_in'] = True
+            # print("CUR1",current_user)
+            flash('You were logged in.','success')
+            return redirect(url_for('home'))
 
     return render_template('login.html', error=error)
 
@@ -123,15 +142,18 @@ def register():
                         flash("Make sure your password has a number in it","danger")
                     else:
                         flash("Make sure your password has a letter in it","danger")
+                elif isInvalid(request.form['username']):
+                    flash("Username already exists!!", "danger")
+                elif isInvalidMail(request.form['email']):
+                    flash("Email already exists!!", "danger")
                 else:
-                    hashed_password = bcrypt.generate_password_hash(request.form['password']).decode('utf-8')
+                    hashed_password = bcrypt.hashpw(request.form['password'].encode('utf-8'),bcrypt.gensalt())
+                        # .decode('utf-8')
                     user = User(username=request.form['username'],email=request.form['email'],password=hashed_password)
                     db.session.add(user)
                     db.session.commit()
-                    flash('Registration Success!! Happy Blogging',"warning")
-                    # print(users)
-                    users[request.form['username']]=request.form['password']
-                    users.__setitem__(request.form['username'],request.form['password'])
+                    flash("Registration Success!! Your Details have been added." ,"warning")
+                    # print(hashed_password)
                     # print(users)
                     return redirect(url_for('home'))
 
