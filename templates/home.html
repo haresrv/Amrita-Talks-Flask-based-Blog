@@ -13,6 +13,9 @@
                 <div class="article-metadata">
                     <a class="" href="#">{{post.author}}</a>
                     <small class="text-muted">{{post.date_posted}}</small>
+                    <button style="float:right" type="button" class="btn btn-danger" >
+                    <a href="/deletePost/{{post.id}}" style="color: antiquewhite;">Delete</a>
+                    </button>
                 </div>
                 <h2>{{post.title}}</h2>
                 <p class="">{{post.content}}</p>

@@ -199,7 +199,14 @@ def register():
 
     return render_template('register.html', error=error)
 
-
+@app.route('/deletePost/<blogid>')
+@login_required
+def deletePost(blogid):
+    Post.query.filter_by(id=int(blogid)).delete()
+    # db.session.delete(obj)
+    print(Post.query.filter_by(id=int(blogid)))
+    db.session.commit()
+    return redirect(url_for('home'))    
 
 @app.route('/logout')
 @login_required
