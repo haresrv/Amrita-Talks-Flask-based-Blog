@@ -1,4 +1,4 @@
-from flask import Flask, render_template ,redirect, url_for,request,session,flash
+from flask import Flask, render_template ,redirect, url_for,request,session,flash, make_response
 from functools import wraps
 import re
 from datetime import datetime
@@ -65,6 +65,10 @@ def login_required(f):
             return redirect(url_for('login'))
     return wrap
 
+def getcookie():
+    if str('Current_User') in request.cookies:
+        item=request.cookies.get('Current_User')
+    return item
 
 def validate(password):
         if len(password) < 6:
@@ -121,10 +125,20 @@ def home():
 def about():
     return render_template("about.html",title='About')
 
+@app.route('/saveDraft', methods = ['POST'])
+@login_required
+def saveDraft():
+    print(request.form['content'])
+    
+    res = make_response(render_template('new_post.html',title=dict(request.form)['title'],content=dict(request.form)['content'] ) )
+    res.set_cookie(current_user+"content",dict(request.form)['content'])
+    res.set_cookie(current_user+"title",dict(request.form)['title'])
+    return res
 
 @login_required
 @app.route("/create",methods = ['GET','POST'])
 def create():
+    current_user=request.cookies.get('Current_user')
     if request.method == 'POST':
         if request.form["title"] == "" or request.form["content"] == "":
             flash('Enter all fields','danger')
@@ -137,12 +151,20 @@ def create():
             update()
             return redirect(url_for("home"))
     
-    return render_template("new_post.html",title='NEW POST')
-
+    if request.cookies.get(str(current_user)+"content") is not None:
+        print(current_user)
+        res = make_response(render_template('new_post.html',title="",content="") )
+        res.set_cookie(current_user+"content","")
+        res.set_cookie(current_user+"title","")
+    else:
+        res = make_response(render_template('new_post.html',title=request.cookies.get(current_user+"title"),content=request.cookies.get(current_user+"content")) )
+    return res
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
+
+    current_user=request.cookies.get('Current_user')
     if request.method == 'POST':
         # bcrypt.hashpw(request.form['password'].encode('utf-8').encode('utf-8'), hashed_password) == hashed_password
         user = User.query.filter_by(username=request.form['username']).first()
@@ -156,17 +178,22 @@ def login():
             current_user_id = User.query.filter_by(username=request.form['username']).first().id
             current_user_id = int(current_user_id)
             session['logged_in'] = True
+            print("CUR1",current_user)
             # print("CUR1",current_user)
             flash('You were logged in.','success')
-            update()
             
-            return redirect(url_for('home'))
+            resp = make_response(render_template('home.html'))
+            resp.set_cookie("Current_User",current_user)
+            
+            return resp 
 
     return render_template('login.html', error=error)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     error = None
+
+    current_user=request.cookies.get('Current_user')
     if request.method == 'POST':
         if request.form['fname']=="" or request.form['lname']=="" or request.form['mobile']=="" or request.form['email']=="" or request.form['username']=="" or request.form['password']=="" or request.form['cpassword']=="":
             flash('Fill all Credentials and Try again.',"danger")
@@ -212,12 +239,14 @@ def deletePost(blogid):
 @login_required
 def logout():
     session.pop('logged_in', None)
+    
     current_user=""
     current_user_id=""
     flash('You were logged out.')
     # print("CUR2",current_user)
-    return redirect(url_for('login'))
-
+    resp= make_response(url_for('login'))
+    resp.set_cookie('Current_User', '', expires=0)
+    return resp
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -226,4 +255,4 @@ def page_not_found(e):
     return render_template('error.html'), 404
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True,port='4000')
