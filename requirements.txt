@@ -14,7 +14,7 @@ distro==1.4.0
 Flask==1.1.1
 Flask-Cors==3.0.8
 Flask-SQLAlchemy==2.4.1
-Guake==3.6.3
+Guake==3.8.5
 html5lib==1.0.1
 idna==2.9
 importlib-metadata==1.5.0
