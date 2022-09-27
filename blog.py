@@ -1,16 +1,18 @@
 from flask import Flask, render_template ,redirect, url_for,request,session,flash, make_response
+from wsgiref import simple_server
 from functools import wraps
 import re
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db = SQLAlchemy(app)
 app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
 current_user = ""
-current_user_id = 0
+current_user_id = -1
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -52,8 +54,6 @@ class Post(db.Model):
 # ]
 
 posts = []
-
-# users = {"Chosen_One":"DrewMcintyre123","Architect":"SethRollins123","Rated_R_Superstar":"Edge123","Phenomenal_One":"AJStyles123"}
 
 def login_required(f):
     @wraps(f)
@@ -100,8 +100,10 @@ def row2dict(row):
     d = {}
     for column in row.__table__.columns:
         if(column.name=='user_id'):
-            # print(int(str(getattr(row, column.name))))
-            d["author"] =   str(db.session.query(User).filter_by(id=int(str(getattr(row, column.name)))).first().username)
+            print("ROW2DICT")
+            print(int(str(getattr(row, column.name))))
+            if(db.session.query(User).filter_by(id=int(str(getattr(row, column.name)))).first()!=None):
+                d["author"] =   str(db.session.query(User).filter_by(id=int(str(getattr(row, column.name)))).first().username)
         else:
             d[column.name] = str(getattr(row, column.name))
     return d
@@ -138,33 +140,26 @@ def saveDraft():
 @login_required
 @app.route("/create",methods = ['GET','POST'])
 def create():
-    current_user=request.cookies.get('Current_user')
+    global current_user_id;
+    current_user=request.cookies.get('Current_User')
     if request.method == 'POST':
         if request.form["title"] == "" or request.form["content"] == "":
             flash('Enter all fields','danger')
 
         else:
-            # print(type(current_user_id))
+            print(current_user_id)
             db.session.add(Post(title = request.form["title"],content = request.form["content"],user_id = current_user_id ))
             # print(dict(db.session.query(Post).filter_by(title=request.form["title"]).__dict__))
             db.session.commit()
             update()
             return redirect(url_for("home"))
     
-    if request.cookies.get(str(current_user)+"content") is not None:
-        print(current_user)
-        res = make_response(render_template('new_post.html',title="",content="") )
-        res.set_cookie(current_user+"content","")
-        res.set_cookie(current_user+"title","")
-    else:
-        res = make_response(render_template('new_post.html',title=request.cookies.get(current_user+"title"),content=request.cookies.get(current_user+"content")) )
-    return res
+    return render_template("new_post.html",title='NEW POST')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    global current_user_id;
     error = None
-
-    current_user=request.cookies.get('Current_user')
     if request.method == 'POST':
         # bcrypt.hashpw(request.form['password'].encode('utf-8').encode('utf-8'), hashed_password) == hashed_password
         user = User.query.filter_by(username=request.form['username']).first()
@@ -178,14 +173,11 @@ def login():
             current_user_id = User.query.filter_by(username=request.form['username']).first().id
             current_user_id = int(current_user_id)
             session['logged_in'] = True
-            print("CUR1",current_user)
-            # print("CUR1",current_user)
+            print("CUR1",current_user_id)
             flash('You were logged in.','success')
+            update()
             
-            resp = make_response(render_template('home.html'))
-            resp.set_cookie("Current_User",current_user)
-            
-            return resp 
+            return redirect(url_for('home'))
 
     return render_template('login.html', error=error)
 
@@ -193,7 +185,7 @@ def login():
 def register():
     error = None
 
-    current_user=request.cookies.get('Current_user')
+    current_user=request.cookies.get('Current_User')
     if request.method == 'POST':
         if request.form['fname']=="" or request.form['lname']=="" or request.form['mobile']=="" or request.form['email']=="" or request.form['username']=="" or request.form['password']=="" or request.form['cpassword']=="":
             flash('Fill all Credentials and Try again.',"danger")
@@ -241,7 +233,7 @@ def logout():
     session.pop('logged_in', None)
     
     current_user=""
-    current_user_id=""
+    current_user_id=-1
     flash('You were logged out.')
     # print("CUR2",current_user)
     resp= make_response(url_for('login'))
@@ -255,4 +247,8 @@ def page_not_found(e):
     return render_template('error.html'), 404
 
 if __name__ == "__main__":
-    app.run(debug=True,port='4000')
+    host = '0.0.0.0'
+    port = int(os.environ.get('PORT'))
+    httpd = simple_server.make_server(host, port, app)
+    print("Serving on %s %d" % (host, port))
+    httpd.serve_forever()
