@@ -3,6 +3,13 @@
 # and commit this file to your remote git repository to share the goodness with others.
 
 tasks:
-  - init: pip install -r requirements.txt
-
-
+  - name: Install Python 3.6.9
+    before: |
+      pyenv install 3.6.9
+      pyenv local 3.6.9
+    env:
+      PORT: 8000  
+    init: |
+      pip install -r requirements.txt
+    command: |
+      python blog.py
